@@ -62,7 +62,7 @@ from typing import Callable
 def show_data_v_modal(
     weight: float, bias: float, modal_function: Callable[[float, float, float], float]
 ) -> None:
-    plot.scatter(data["input"], data["output"])
+    plot.plot(data["input"], data["output"])
 
     modal_output = []
 

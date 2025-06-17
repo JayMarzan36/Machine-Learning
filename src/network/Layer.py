@@ -1,52 +1,64 @@
-import math, random
+import numpy
+
+
 class Layer:
-    def __init__(self, num_of_nodes_in: int, num_of_nodes_out: int) -> None:
-        self.num_of_nodes_in = num_of_nodes_in
+    def __init__(self, input_size, output_size, activation="sigmoid") -> None:
+        self.input_size = input_size
 
-        self.num_of_nodes_out = num_of_nodes_out
+        self.output_size = output_size
 
-        self.weights = [[random.uniform(-1,1) for _ in range(self.num_of_nodes_in)] for _ in range(self.num_of_nodes_out)]
-
-        self.biases = [0.0 for _ in range(num_of_nodes_out)]
-
-        self.loss_gradient_w = [[0.0 for _ in range(self.num_of_nodes_in)] for _ in range(self.num_of_nodes_out)]
-
-        self.loss_gradient_b = [0.0 for _ in range(self.num_of_nodes_out)]
-
-    def calculate_outputs(self, inputs: list):
-        weighted_inputs = [0.0 for _ in range(self.num_of_nodes_out)]
-
-        for i in range(0, self.num_of_nodes_out, 1):
-            weighted_input = self.biases[i]
-
-            for j in range(0, self.num_of_nodes_in, 1):
-                weighted_input += inputs[j] * self.weights[i][j]
-
-            weighted_inputs[i] = self.activation(weighted_input)
-
-        return weighted_inputs
-
-    def activation(self, weighted_input):
-        return (
-            1
-            / (1 + math.exp(-weighted_input))
-            * (1 - 1 / (1 + math.exp(-weighted_input)))
+        self.weights = numpy.random.randn(input_size, output_size) * numpy.sqrt(
+            2.0 / input_size
         )
 
-    def cost(self, output_activation, expected_output):
-        return 2 * (output_activation - expected_output)
+        self.bias = numpy.zeros((1, output_size))
 
-    def apply_gradient(self, learn_rate: float):
-        for i in range(self.num_of_nodes_out):
-            self.biases[i] -= self.loss_gradient_b[i] * learn_rate
+        if activation == "sigmoid":
+            self.activation = self._sigmoid
 
-            for j in range(self.num_of_nodes_in):
-                self.weights[i][j] -= self.loss_gradient_w[i][j] * learn_rate
+            self.activation_derivative = self._sigmoid_derivative
 
-    def calculate_output_layer_node_values(self, expected_outputs):
-        node_values = [0.0 for _ in range(len(expected_outputs))]
-        
-        for i in range(len(node_values)):
-            loss_derivative = self.cost(activations[i], expected_outputs[i])
-            
-            activation = self.activation()
+        elif activation == "linear":
+            self.activation = self._linear
+
+            self.activation_derivative = self._linear_derivative
+
+        self.input = None
+
+        self.output = None
+
+    def forward(self, input_data) -> float:
+        self.input = input_data
+
+        z = numpy.dot(input_data, self.weights) + self.bias
+
+        self.output = self.activation(z)
+
+        return self.output
+
+    def backward(self, output_error, learning_rate):
+        delta = output_error * self.activation_derivative(self.output)
+
+        d_weights = numpy.dot(self.input.T, delta)
+
+        d_bias = numpy.sum(delta, axis=0, keepdims=True)
+
+        input_error = numpy.dot(delta, self.weights.T)
+
+        self.weights -= learning_rate * d_weights
+
+        self.bias -= learning_rate * d_bias
+
+        return input_error
+
+    def _sigmoid(self, x) -> float:
+        return 1 / (1 + numpy.exp(-x))
+
+    def _sigmoid_derivative(self, x) -> float:
+        return x * (1 - x)
+
+    def _linear(self, x) -> float:
+        return x
+
+    def _linear_derivative(self, x) -> float:
+        return numpy.ones_like(x)

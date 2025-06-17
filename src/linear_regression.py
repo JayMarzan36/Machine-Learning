@@ -2,7 +2,7 @@
 
 
 import matplotlib.pyplot as plot
-import random, time
+import random, time, math
 
 from make_data import gen_data, test
 
@@ -11,10 +11,10 @@ from make_data import gen_data, test
 
 
 def data_function(x: float) -> float:
-    return 3.1 * x + 2
+    return math.sin(x)
 
 
-data = gen_data(10, [0, 5], data_function)
+data = gen_data(10, [0, 50], data_function)
 
 length_of_examples = len(data["input"])
 
@@ -45,7 +45,6 @@ def show_loss(total_losses) -> None:
 
     plot.show()
 
-
 def show_data() -> None:
     plot.plot(data["input"], data["output"])
     plot.title("Data")
@@ -55,14 +54,12 @@ def show_data() -> None:
 
     plot.show()
 
-
 from typing import Callable
-
 
 def show_data_v_modal(
     weight: float, bias: float, modal_function: Callable[[float, float, float], float]
 ) -> None:
-    plot.plot(data["input"], data["output"])
+    plot.scatter(data["input"], data["output"])
 
     modal_output = []
 
@@ -177,6 +174,7 @@ def main() -> None:
         final_bias,
         data_function
     )
+
 
     show_data_v_modal(final_weight, final_bias, compute_prediction)
 

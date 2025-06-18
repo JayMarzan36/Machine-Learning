@@ -12,21 +12,16 @@ class Layer:
         )
 
         self.bias = numpy.zeros((1, output_size))
-        
-        if activation == "sigmoid":
-            self.activation = self._sigmoid
 
-            self.activation_derivative = self._sigmoid_derivative
-
-        elif activation == "linear":
+        if activation:
+            self._aply_activation(activation)
+        else:
+            # default if no activation found
             self.activation = self._linear
 
             self.activation_derivative = self._linear_derivative
-        
-        elif activation == "lrelu":
-            self.activation = self._leaky_relu
-            
-            self.activation_derivative = self._leaky_relu_derivative
+
+            self.activation_type = "linear"
 
         self.input = None
 
@@ -56,6 +51,28 @@ class Layer:
 
         return input_error
 
+    def _aply_activation(self, type: str):
+        if type == "sigmoid":
+            self.activation = self._sigmoid
+
+            self.activation_derivative = self._sigmoid_derivative
+
+            self.activation_type = "sigmoid"
+
+        elif type == "linear":
+            self.activation = self._linear
+
+            self.activation_derivative = self._linear_derivative
+
+            self.activation_type = "linear"
+
+        elif type == "lrelu":
+            self.activation = self._leaky_relu
+
+            self.activation_derivative = self._leaky_relu_derivative
+
+            self.activation_type = "lrelu"
+
     def _sigmoid(self, x) -> float:
         return 1 / (1 + numpy.exp(-x))
 
@@ -67,10 +84,10 @@ class Layer:
 
     def _linear_derivative(self, x) -> float:
         return numpy.ones_like(x)
-    
-    def _leaky_relu(float, x, constant: float = 0.01) -> float:
-        return numpy.maximum(x*constant,x)
-    
+
+    def _leaky_relu(self, x, constant: float = 0.01) -> float:
+        return numpy.maximum(x * constant, x)
+
     def _leaky_relu_derivative(self, x, constant: float = 0.01) -> float:
         dx = numpy.ones_like(x)
         dx[x < 0] = constant

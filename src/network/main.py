@@ -13,11 +13,20 @@ y = numpy.sin(X)
 
 # Create network and add layers
 net = Network()
+
+# 3 layers? 1-10-1
 net.add_layer(Layer(1, 10, activation="sigmoid"))
 net.add_layer(Layer(10, 1, activation="linear"))  # output layer, linear activation
 
 # Train
 epochs = 8_000_000
+
+# With current settings, takes ~6 min
+
+# For first layer
+    # leaky relu 406 sec, final loss = 0.14962
+    # sigmoid 392 sec, final loss = 0.0009977
+
 
 print_loss = int(epochs / 8)
 

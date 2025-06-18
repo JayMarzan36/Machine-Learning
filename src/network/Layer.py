@@ -12,7 +12,7 @@ class Layer:
         )
 
         self.bias = numpy.zeros((1, output_size))
-
+        
         if activation == "sigmoid":
             self.activation = self._sigmoid
 
@@ -22,6 +22,11 @@ class Layer:
             self.activation = self._linear
 
             self.activation_derivative = self._linear_derivative
+        
+        elif activation == "lrelu":
+            self.activation = self._leaky_relu
+            
+            self.activation_derivative = self._leaky_relu_derivative
 
         self.input = None
 
@@ -62,3 +67,11 @@ class Layer:
 
     def _linear_derivative(self, x) -> float:
         return numpy.ones_like(x)
+    
+    def _leaky_relu(float, x, constant: float = 0.01) -> float:
+        return numpy.maximum(x*constant,x)
+    
+    def _leaky_relu_derivative(self, x, constant: float = 0.01) -> float:
+        dx = numpy.ones_like(x)
+        dx[x < 0] = constant
+        return dx

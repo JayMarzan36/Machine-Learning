@@ -1,8 +1,8 @@
-import numpy, json
+import numpy, json, time
 from Layer import Layer
 
 
-class Network:
+class network:
     def __init__(self, model_path: str = "") -> None:
         self.layers = []
 
@@ -31,20 +31,38 @@ class Network:
 
     def train(self, X, y, epochs, learning_rate, print_loss_every=100):
         losses = []
+        loss = 0
+
+        num_samples = X.shape[0]
+        indices = numpy.arange(num_samples)
+        
+        batch_size = self.get_batch_size(num_samples)
 
         for epoch in range(epochs):
-            output = self.forward(X)
+            start_time = time.time()
+            # Shuffle data at the start of each epoch
+            numpy.random.shuffle(indices)
+            X_shuffled = X[indices]
+            y_shuffled = y[indices]
 
-            loss = numpy.mean((output - y) ** 2)
+            for start in range(0, num_samples, batch_size):
+                end = start + batch_size
+                X_batch = X_shuffled[start:end]
+                y_batch = y_shuffled[start:end]
 
-            losses.append(loss)
+                output = self.forward(X_batch)
+                loss = numpy.mean((output - y_batch) ** 2)
+                loss_grad = 2 * (output - y_batch) / y_batch.size
+                self.backward(loss_grad, learning_rate)
 
-            loss_grad = 2 * (output - y) / y.size
+                # Optionally, compute loss on the whole dataset for logging
+                # output = self.forward(X)
+                # loss = numpy.mean((output - y) ** 2)
+                losses.append(loss)
 
-            self.backward(loss_grad, learning_rate)
-
-            if epoch % print_loss_every == 0:
-                print(f"Epoch {epoch}, Loss: {loss:.4f}")
+            if print_loss_every != 0:
+                if epoch % print_loss_every == 0:
+                    print(f"Epoch {epoch}, Loss: {loss:.4f}, Time:{time.time() - start_time}")
 
         return losses
 
@@ -120,3 +138,11 @@ class Network:
             print(f"Error loading model: {e}")
 
             return {}
+        
+    def get_batch_size(self, num_samples, fraction=0.1, min_size=8, max_size=128):
+        batch_size = int(num_samples * fraction)
+        
+        batch_size = max(min_size, min(batch_size, max_size))
+        
+        return (2 ** int(round(numpy.log2(batch_size))))
+

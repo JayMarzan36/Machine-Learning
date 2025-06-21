@@ -4,7 +4,8 @@ import time
 
 from Network import network
 from Layer import Layer
-
+from util.token import Tokenizer
+from util.plot import plot_results
 
 def train(
     epochs: int,
@@ -13,6 +14,7 @@ def train(
     run_till_min: bool = False,
 ):
 
+    #TODO train on classifying binary logic gates
     # Generate data
     X = numpy.linspace(-2 * numpy.pi, 2 * numpy.pi, 100).reshape(-1, 1)
     y = numpy.sin(X)
@@ -76,7 +78,7 @@ def train(
         print(f"Final Loss : {run_to_min_loss[len(run_to_min_loss) - 1]}")
 
         print(f"Train Time : {(time.time() - start_time)/60}")  # Minutes
-        
+
         print(f"Final Epoch : {epochs}")
 
     else:
@@ -101,27 +103,17 @@ def train(
             print(f"Model saved")
         else:
             print(f"Error saving model")
-#TODO put the plotting into a function for clean look
+    # TODO put the plotting into a function for clean look
     predictions = net.forward(X)
     # Plot results
-    plot.plot(X, y, label="True Function")
-    plot.plot(X, predictions, label="NN Prediction")
-    plot.legend()
-    plot.title("Neural Network Approximation")
-    plot.grid(True)
-    plot.show()
+
+    plot_results(X, y, predictions)
 
     if run_till_min:
         # # Plot loss curve
-        plot.plot(run_to_min_loss)
+        plot_results(run_to_min_loss, [], [], legend_labels=("Loss"))
     else:
-        plot.plot(losses)
-
-    plot.title("Loss Over Epochs")
-    plot.xlabel("Epoch")
-    plot.ylabel("MSE Loss")
-    plot.grid(True)
-    plot.show()
+        plot_results(losses, [], [], legend_labels=("Loss"))
 
 
 def load_and_predict():
@@ -139,23 +131,17 @@ def load_and_predict():
 
 
 # load_and_predict()
-train(epochs=1_000, save_model=True, run_till_min=True, min_loss=0.0002)
+train(epochs=20_000, save_model=True, run_till_min=True, min_loss=0.00001)
 
 
+def test_tokenizer():
+    test = "Give these now"
 
+    tokenizer = Tokenizer("src/network/util/Vocab/vocab_2.json")
 
+    tokens = tokenizer.tokenize(test)
+    print(tokens)
+    
+    print(tokenizer.reverse_tokenize(tokens))
 
-# Weird, the second log of data shows that it is more accurate with less time to train and lower Epoch
-
-# Final Loss : 0.0006228365782891032
-# Train Time : 7.51558168331782
-# Final Epoch : 101000
-
-
-# Final Loss : 0.00023845843572804852
-# Train Time : 6.75608971118927
-# Final Epoch : 96000
-
-# Final Loss : 0.0001567144811065792
-# Train Time : 8.309765632947286
-# Final Epoch : 106000
+# test_tokenizer()

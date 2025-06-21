@@ -1,0 +1,40 @@
+# Weird, the second log of data shows that it is more accurate with less time to train and lower Epoch
+
+# Final Loss : 0.0006228365782891032
+# Train Time : 7.51558168331782
+# Final Epoch : 101000
+
+
+# Final Loss : 0.00023845843572804852
+# Train Time : 6.75608971118927
+# Final Epoch : 96000
+
+# Final Loss : 0.0001567144811065792
+# Train Time : 8.309765632947286
+# Final Epoch : 106000
+
+
+
+
+
+
+
+
+Feedforward networks (you already have this!)
+
+Softmax and Cross-Entropy Loss
+
+Dot-product attention
+
+Multi-head attention
+
+Positional encoding
+
+LayerNorm and residuals
+
+Encoder & Decoder blocks
+
+Masking (causal mask, padding mask)
+
+Tokenization & Embeddings
+

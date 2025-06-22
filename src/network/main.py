@@ -14,15 +14,44 @@ def train(
     run_till_min: bool = False,
 ):
 
-    #TODO train on classifying binary logic gates
+    # TODO train on classifying binary logic gates
     # Generate data
     X = numpy.linspace(-2 * numpy.pi, 2 * numpy.pi, 100).reshape(-1, 1)
     y = numpy.sin(X)
 
-    Z = []
-    for i in X:
-        Z.append(1 / (1 + numpy.exp(-i)))
-    Z = numpy.array(Z)
+    print(X)
+    print(y)
+
+    binary_logic_gates_in = [
+        [0,0,1],
+        [0,1,1],
+        [1,0,1],
+        [1,1,1],
+        [0,0,0],
+        [0,1,1],
+        [1,0,1],
+        [1,1,1],
+        [0,0,1],
+        [0,1,1],
+        [1,0,1],
+        [1,1,0]
+    ]
+
+    binary_logic_gates_out = [
+        ["AND"],
+        ["AND"],
+        ["AND"],
+        ["AND"],
+        ["OR"],
+        ["OR"],
+        ["OR"],
+        ["OR"],
+        ["NAND"],
+        ["NAND"],
+        ["NAND"],
+        ["NAND"],
+    ]
+
     # Create network and add layers
     net = network()
 
@@ -131,7 +160,7 @@ def load_and_predict():
 
 
 # load_and_predict()
-train(epochs=20_000, save_model=True, run_till_min=True, min_loss=0.00001)
+train(epochs=20_000, save_model=False, run_till_min=False, min_loss=0.00001)
 
 
 def test_tokenizer():

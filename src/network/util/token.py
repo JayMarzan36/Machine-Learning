@@ -1,4 +1,4 @@
-import json
+import json, math
 
 class Tokenizer:
     def __init__(self, vocab: str) -> None:
@@ -22,22 +22,32 @@ class Tokenizer:
 
         return tokenized
 
-    def reverse_tokenize(self, input_tokens: list):
-        tokenized = []
+    def reverse_tokenize(self, input_tokens: list | int | float):
 
-        for token in input_tokens:
+        if type(input_tokens) == list:
+            tokenized = []
 
-            token = str(token)
+            for token in input_tokens:
 
-            if token in self.vocab["reverse"]:
+                token = str(token)
 
-                tokenized.append(self.vocab["reverse"][token])
+                if token in self.vocab["reverse"]:
 
-            else:
+                    tokenized.append(int(self.vocab["reverse"][token]))
 
-                tokenized.append("UNK")
+                else:
 
-        return tokenized
+                    tokenized.append("UNK")
+
+            return tokenized
+
+        elif type(input_tokens) == int:
+
+            return [int(self.vocab["reverse"][input_tokens])]
+
+        elif type(input_tokens) == float:
+
+            return [int(self.vocab["reverse"][str(round(input_tokens))])]
 
     def _load_vocab(self, file_path: str):
         with open(file_path, "r") as file:

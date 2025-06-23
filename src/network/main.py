@@ -7,6 +7,7 @@ from Layer import Layer
 from util.token import Tokenizer
 from util.plot import plot_results
 
+
 def train(
     epochs: int,
     save_model: bool = False,
@@ -14,27 +15,33 @@ def train(
     run_till_min: bool = False,
 ):
 
-    # TODO train on classifying binary logic gates
-    # Generate data
-    X = numpy.linspace(-2 * numpy.pi, 2 * numpy.pi, 100).reshape(-1, 1)
-    y = numpy.sin(X)
-
-    print(X)
-    print(y)
+    tokenizer = Tokenizer("src/network/util/Vocab/vocab_2.json")
 
     binary_logic_gates_in = [
-        [0,0,1],
-        [0,1,1],
-        [1,0,1],
-        [1,1,1],
-        [0,0,0],
-        [0,1,1],
-        [1,0,1],
-        [1,1,1],
-        [0,0,1],
-        [0,1,1],
-        [1,0,1],
-        [1,1,0]
+        [0, 0, 1],
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 0, 1],
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 0, 0],
+        [0, 1, 1],
+        [1, 0, 1],
+        [1, 1, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [1, 0, 0],
+        [1, 1, 1],
     ]
 
     binary_logic_gates_out = [
@@ -50,13 +57,35 @@ def train(
         ["NAND"],
         ["NAND"],
         ["NAND"],
+        ["NOR"],
+        ["NOR"],
+        ["NOR"],
+        ["NOR"],
+        ["EX-OR"],
+        ["EX-OR"],
+        ["EX-OR"],
+        ["EX-OR"],
+        ["EX-NOR"],
+        ["EX-NOR"],
+        ["EX-NOR"],
+        ["EX-NOR"],
     ]
+
+    binary_logic_gates_in = numpy.array(binary_logic_gates_in)
+
+    tokenized_out = []
+
+    for i in binary_logic_gates_out:
+        token = tokenizer.tokenize(i[0])
+        tokenized_out.append([token[0]])
+
+    binary_logic_gates_out = numpy.array(tokenized_out)
 
     # Create network and add layers
     net = network()
 
     # 3 layers? 1-10-1
-    net.add_layer(Layer(1, 10, activation="sigmoid"))
+    net.add_layer(Layer(3, 10, activation="sigmoid"))
     net.add_layer(Layer(10, 1, activation="linear"))  # output layer, linear activation
 
     losses = []
@@ -76,8 +105,8 @@ def train(
 
         # Inital Train to set the initial loss
         losses = net.train(
-            X,
-            y,
+            binary_logic_gates_in,
+            binary_logic_gates_out,
             epochs=epochs,
             learning_rate=0.001,
             print_loss_every=0,
@@ -86,8 +115,8 @@ def train(
         while losses[len(losses) - 1] >= min_loss:
 
             losses = net.train(
-                X,
-                y,
+                binary_logic_gates_in,
+                binary_logic_gates_out,
                 epochs=epochs,
                 learning_rate=0.001,
                 print_loss_every=0,
@@ -115,7 +144,11 @@ def train(
         start_time = time.time()
 
         losses = net.train(
-            X, y, epochs=epochs, learning_rate=0.001, print_loss_every=int(epochs / 8)
+            binary_logic_gates_in,
+            binary_logic_gates_out,
+            epochs=epochs,
+            learning_rate=0.001,
+            print_loss_every=int(epochs / 8),
         )
 
         print(f"Final Loss : {losses[len(losses) - 1]}")
@@ -132,11 +165,18 @@ def train(
             print(f"Model saved")
         else:
             print(f"Error saving model")
-    # TODO put the plotting into a function for clean look
-    predictions = net.forward(X)
-    # Plot results
 
-    plot_results(X, y, predictions)
+    predictions = net.forward(binary_logic_gates_in)
+
+    test = net.forward([0, 0, 1]) #AND truth
+
+    test = test.tolist()
+
+    test = tokenizer.reverse_tokenize(test[0][0])
+
+    print(test)
+
+    plot_results(binary_logic_gates_out, predictions, [])
 
     if run_till_min:
         # # Plot loss curve
@@ -160,17 +200,7 @@ def load_and_predict():
 
 
 # load_and_predict()
-train(epochs=20_000, save_model=False, run_till_min=False, min_loss=0.00001)
+train(epochs=2_000_000, save_model=False, run_till_min=False, min_loss=0.00001)
 
-
-def test_tokenizer():
-    test = "Give these now"
-
-    tokenizer = Tokenizer("src/network/util/Vocab/vocab_2.json")
-
-    tokens = tokenizer.tokenize(test)
-    print(tokens)
-    
-    print(tokenizer.reverse_tokenize(tokens))
 
 # test_tokenizer()

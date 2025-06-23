@@ -1,6 +1,5 @@
 import numpy
 
-
 class Layer:
     def __init__(self, input_size, output_size, activation="sigmoid") -> None:
         self.input_size = input_size
@@ -14,7 +13,7 @@ class Layer:
         self.bias = numpy.zeros((1, output_size))
 
         if activation:
-            self._aply_activation(activation)
+            self._apply_activation(activation)
         else:
             # default if no activation found
             self.activation = self._linear
@@ -30,11 +29,25 @@ class Layer:
     def forward(self, input_data) -> float:
         self.input = input_data
 
+
+        # Function original
         z = numpy.dot(input_data, self.weights) + self.bias
 
         self.output = self.activation(z)
 
         return self.output
+
+        # Softmax usage
+        #TODO test and fix
+        # z = numpy.dot(self.input, self.weights) + self.bias
+
+        # a = self._leaky_relu(z)
+
+        # z_2 = numpy.dot(a, self.weights) + self.bias
+
+        # a_2 = self._soft_max(z_2)
+
+        # return a_2
 
     def backward(self, output_error, learning_rate):
         delta = output_error * self.activation_derivative(self.output)
@@ -51,7 +64,7 @@ class Layer:
 
         return input_error
 
-    def _aply_activation(self, type: str):
+    def _apply_activation(self, type: str):
         if type == "sigmoid":
             self.activation = self._sigmoid
 
@@ -73,22 +86,32 @@ class Layer:
 
             self.activation_type = "lrelu"
 
-    def _sigmoid(self, x) -> float:
+    def _sigmoid(self, x: float) -> float:
         return 1 / (1 + numpy.exp(-x))
 
-    def _sigmoid_derivative(self, x) -> float:
+    def _sigmoid_derivative(self, x: float) -> float:
         return x * (1 - x)
 
-    def _linear(self, x) -> float:
+    def _linear(self, x: float) -> float:
         return x
 
     def _linear_derivative(self, x) -> float:
         return numpy.ones_like(x)
 
-    def _leaky_relu(self, x, constant: float = 0.01) -> float:
+    def _leaky_relu(self, x: float, constant: float = 0.01) -> float:
         return numpy.maximum(x * constant, x)
 
     def _leaky_relu_derivative(self, x, constant: float = 0.01) -> float:
         dx = numpy.ones_like(x)
         dx[x < 0] = constant
         return dx
+
+    # TODO add softmax
+
+    def _soft_max(self, x):
+        exp_logits = numpy.exp(x - numpy.max(x, axis = 1, keepdims=True))
+
+        return exp_logits / numpy.sum(exp_logits, axis=1, keepdims=True)
+
+    def _soft_max_derivative(self, x):
+        pass

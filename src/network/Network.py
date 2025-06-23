@@ -16,6 +16,7 @@ class network:
 
         for layer in self.layers:
             output = layer.forward(output)
+
         return output
 
     def predict(self, input_data: list):
@@ -35,34 +36,54 @@ class network:
 
         num_samples = X.shape[0]
         indices = numpy.arange(num_samples)
-        
+
+        # Set batch size
         batch_size = self.get_batch_size(num_samples)
 
+        # Training loop
         for epoch in range(epochs):
+            # Get start time for timing
             start_time = time.time()
+
             # Shuffle data at the start of each epoch
             numpy.random.shuffle(indices)
             X_shuffled = X[indices]
             y_shuffled = y[indices]
 
+            # Batch training
             for start in range(0, num_samples, batch_size):
                 end = start + batch_size
                 X_batch = X_shuffled[start:end]
                 y_batch = y_shuffled[start:end]
 
-                output = self.forward(X_batch)
-                loss = numpy.mean((output - y_batch) ** 2)
-                loss_grad = 2 * (output - y_batch) / y_batch.size
-                self.backward(loss_grad, learning_rate)
+                output = self.forward(X_batch)  # Y_hat
+
+                # Compute Loss
+                # loss = numpy.mean((output - y_batch) ** 2)
+                # loss_grad = 2 * (output - y_batch) / y_batch.size
+                # # Add loss to array for plotting
+                # losses.append(loss)
+
+                # Compute Loss (Cross Entropy)
+                # TODO test
+                m = y_batch.shape[0]
+                log_likelihood = -numpy.log(output[range(m), y])
+                loss = numpy.sum(log_likelihood)
+                losses.append(loss)
+
+                # Backpropagation
+                self.backward(loss, learning_rate)
 
                 # Optionally, compute loss on the whole dataset for logging
                 # output = self.forward(X)
                 # loss = numpy.mean((output - y) ** 2)
-                losses.append(loss)
 
+            # Checking if print enable then printing every epoch % print_loss_every
             if print_loss_every != 0:
                 if epoch % print_loss_every == 0:
-                    print(f"Epoch {epoch}, Loss: {loss:.4f}, Time:{time.time() - start_time}")
+                    print(
+                        f"Epoch {epoch}, Loss: {loss:.4f}, Time:{time.time() - start_time}"
+                    )
 
         return losses
 
@@ -138,11 +159,10 @@ class network:
             print(f"Error loading model: {e}")
 
             return {}
-        
+
     def get_batch_size(self, num_samples, fraction=0.1, min_size=8, max_size=128):
         batch_size = int(num_samples * fraction)
-        
-        batch_size = max(min_size, min(batch_size, max_size))
-        
-        return (2 ** int(round(numpy.log2(batch_size))))
 
+        batch_size = max(min_size, min(batch_size, max_size))
+
+        return 2 ** int(round(numpy.log2(batch_size)))

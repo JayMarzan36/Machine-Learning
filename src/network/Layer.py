@@ -1,5 +1,6 @@
 import numpy
 
+
 class Layer:
     def __init__(self, input_size, output_size, activation="sigmoid") -> None:
         self.input_size = input_size
@@ -29,25 +30,24 @@ class Layer:
     def forward(self, input_data) -> float:
         self.input = input_data
 
+        ## Function original
+        # z = numpy.dot(input_data, self.weights) + self.bias
 
-        # Function original
-        z = numpy.dot(input_data, self.weights) + self.bias
+        # self.output = self.activation(z)
 
-        self.output = self.activation(z)
-
-        return self.output
+        # return self.output
 
         # Softmax usage
-        #TODO test and fix
-        # z = numpy.dot(self.input, self.weights) + self.bias
+        z = numpy.dot(self.input, self.weights) + self.bias #TODO see if softmax has a batch learning version. I the batch training is resulting in the 8 from (8,10)
 
-        # a = self._leaky_relu(z)
+        a = self._leaky_relu(z)
 
-        # z_2 = numpy.dot(a, self.weights) + self.bias
+        # TODO shapes (8,10) and (3,10) not aligned
+        z_2 = numpy.dot(a, self.weights) + self.bias
 
-        # a_2 = self._soft_max(z_2)
+        self.ouput = self._soft_max(z_2)
 
-        # return a_2
+        return self.output
 
     def backward(self, output_error, learning_rate):
         delta = output_error * self.activation_derivative(self.output)
@@ -106,10 +106,8 @@ class Layer:
         dx[x < 0] = constant
         return dx
 
-    # TODO add softmax
-
-    def _soft_max(self, x):
-        exp_logits = numpy.exp(x - numpy.max(x, axis = 1, keepdims=True))
+    def _soft_max(self, x) -> float:
+        exp_logits = numpy.exp(x - numpy.max(x, axis=1, keepdims=True))
 
         return exp_logits / numpy.sum(exp_logits, axis=1, keepdims=True)
 

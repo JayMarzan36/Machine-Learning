@@ -55,6 +55,8 @@ class network:
                 end = start + batch_size
                 X_batch = X_shuffled[start:end]
                 y_batch = y_shuffled[start:end]
+                
+                print(X_batch)
 
                 output = self.forward(X_batch)  # Y_hat
 
@@ -67,7 +69,7 @@ class network:
                 # Compute Loss (Cross Entropy)
                 # TODO test
                 m = y_batch.shape[0]
-                log_likelihood = -numpy.log(output[range(m), y])
+                log_likelihood = -numpy.log(output)
                 loss = numpy.sum(log_likelihood)
                 losses.append(loss)
 
@@ -160,7 +162,7 @@ class network:
 
             return {}
 
-    def get_batch_size(self, num_samples, fraction=0.1, min_size=8, max_size=128):
+    def get_batch_size(self, num_samples, fraction=0.1, min_size=8, max_size=128): #TODO the min_size influences the 8 in (8,10) so the batch size
         batch_size = int(num_samples * fraction)
 
         batch_size = max(min_size, min(batch_size, max_size))

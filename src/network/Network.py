@@ -24,11 +24,13 @@ class network:
 
         return self.forward(x)
 
-    def backward(self, loss_grad, learning_rate):
-        grad = loss_grad
-
-        for layer in reversed(self.layers):
-            grad = layer.backward(grad, learning_rate)
+    def backward(self, grad, learning_rate):
+        for i, layer in enumerate(reversed(self.layers)):
+            # Only pass y_one_hot to the output (softmax) layer
+            if hasattr(layer, 'activation_type') and layer.activation_type == "softmax":
+                grad = layer.backward(grad, self.last_y_batch, learning_rate)
+            else:
+                grad = layer.backward(grad, None, learning_rate)
 
     def train(self, X, y, epochs, learning_rate, print_loss_every=100):
         losses = []
@@ -55,30 +57,20 @@ class network:
                 end = start + batch_size
                 X_batch = X_shuffled[start:end]
                 y_batch = y_shuffled[start:end]
-                
-                print(X_batch)
 
                 output = self.forward(X_batch)  # Y_hat
 
-                # Compute Loss
-                # loss = numpy.mean((output - y_batch) ** 2)
-                # loss_grad = 2 * (output - y_batch) / y_batch.size
-                # # Add loss to array for plotting
-                # losses.append(loss)
-
                 # Compute Loss (Cross Entropy)
-                # TODO test
                 m = y_batch.shape[0]
-                log_likelihood = -numpy.log(output)
-                loss = numpy.sum(log_likelihood)
+                y_indices = numpy.argmax(y_batch, axis=1)
+                log_likelihood = -numpy.log(output[range(m), y_indices])
+                loss = numpy.sum(log_likelihood) / m
                 losses.append(loss)
 
-                # Backpropagation
-                self.backward(loss, learning_rate)
-
-                # Optionally, compute loss on the whole dataset for logging
-                # output = self.forward(X)
-                # loss = numpy.mean((output - y) ** 2)
+                # Compute gradient for softmax + cross-entropy
+                grad = output - y_batch
+                self.last_y_batch = y_batch  # Store for backward
+                self.backward(grad, learning_rate)
 
             # Checking if print enable then printing every epoch % print_loss_every
             if print_loss_every != 0:
@@ -135,7 +127,7 @@ class network:
             layer_info = layer_dict[key]
 
             layer = Layer(
-                layer_info["inputs"], layer_info["outputs"], layer_info["activation"]
+                layer_info["inputs"], layer_info["outputs"]
             )
 
             layer.weights = numpy.array(layer_info["weights"])
@@ -162,7 +154,7 @@ class network:
 
             return {}
 
-    def get_batch_size(self, num_samples, fraction=0.1, min_size=8, max_size=128): #TODO the min_size influences the 8 in (8,10) so the batch size
+    def get_batch_size(self, num_samples, fraction=0.1, min_size=4, max_size=128): #TODO the min_size influences the 8 in (8,10) so the batch size
         batch_size = int(num_samples * fraction)
 
         batch_size = max(min_size, min(batch_size, max_size))

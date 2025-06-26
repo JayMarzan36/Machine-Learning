@@ -17,76 +17,78 @@ def train(
 
     tokenizer = Tokenizer("src/network/util/Vocab/vocab_2.json")
 
-    binary_logic_gates_in = [
-        [0, 0, 1],
-        [0, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-        [0, 0, 0],
-        [0, 1, 1],
-        [1, 0, 1],
-        [1, 1, 1],
-        [0, 0, 1],
-        [0, 1, 1],
-        [1, 0, 1],
-        [1, 1, 0],
-        [0, 0, 1],
-        [0, 1, 0],
-        [1, 0, 0],
-        [1, 1, 0],
-        [0, 0, 0],
-        [0, 1, 1],
-        [1, 0, 1],
-        [1, 1, 0],
-        [0, 0, 1],
-        [0, 1, 0],
-        [1, 0, 0],
-        [1, 1, 1],
-    ]
-
-    binary_logic_gates_out = [
-        ["AND"],
-        ["AND"],
-        ["AND"],
-        ["AND"],
-        ["OR"],
-        ["OR"],
-        ["OR"],
-        ["OR"],
-        ["NAND"],
-        ["NAND"],
-        ["NAND"],
-        ["NAND"],
-        ["NOR"],
-        ["NOR"],
-        ["NOR"],
-        ["NOR"],
-        ["EX-OR"],
-        ["EX-OR"],
-        ["EX-OR"],
-        ["EX-OR"],
-        ["EX-NOR"],
-        ["EX-NOR"],
-        ["EX-NOR"],
-        ["EX-NOR"],
-    ]
+    binary_logic_gates_in = numpy.array(
+        [
+            [0, 0, 1],
+            [0, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 0, 0],
+            [0, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 0, 1],
+            [0, 1, 1],
+            [1, 0, 1],
+            [1, 1, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 0, 0],
+            [0, 1, 1],
+            [1, 0, 1],
+            [1, 1, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0],
+            [1, 1, 1],
+        ]
+    )
+    # 1,0,0,0,0,0 AND
+    # 0,1,0,0,0,0 OR
+    # 0,0,1,0,0,0 NAND
+    # 0,0,0,1,0,0 NOR
+    # 0,0,0,0,1,0 EX-OR
+    # 0,0,0,0,0,1 EX-NOR
+    binary_logic_gates_out = numpy.array(
+        [
+            [1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1],
+        ]
+    )
 
     binary_logic_gates_in = numpy.array(binary_logic_gates_in)
-
-    tokenized_out = []
-
-    for i in binary_logic_gates_out:
-        token = tokenizer.tokenize(i[0])
-        tokenized_out.append([token[0]])
-
-    binary_logic_gates_out = numpy.array(tokenized_out)
 
     # Create network and add layers
     net = network()
 
     # 3 layers? 1-10-1
-    net.add_layer(Layer(3, 10, activation="sigmoid"))
-    net.add_layer(Layer(10, 1, activation="linear"))  # output layer, linear activation
+    net.add_layer(Layer(3, 16, activation="lrelu"))
+    net.add_layer(Layer(16,8, activation="lrelu"))
+    net.add_layer(Layer(8, 6, activation="softmax"))
 
     losses = []
 
@@ -147,7 +149,7 @@ def train(
             binary_logic_gates_in,
             binary_logic_gates_out,
             epochs=epochs,
-            learning_rate=0.001,
+            learning_rate=0.01,
             print_loss_every=int(epochs / 8),
         )
 
@@ -168,15 +170,18 @@ def train(
 
     predictions = net.forward(binary_logic_gates_in)
 
-    test = net.forward([0, 0, 1]) #AND truth
-
-    test = test.tolist()
-
-    test = tokenizer.reverse_tokenize(test[0][0])
+    test = net.forward([0, 0, 1])  # AND truth
 
     print(test)
 
-    plot_results(binary_logic_gates_out, predictions, [])
+    # 1,0,0,0,0,0 AND
+    # 0,1,0,0,0,0 OR
+    # 0,0,1,0,0,0 NAND
+    # 0,0,0,1,0,0 NOR
+    # 0,0,0,0,1,0 EX-OR
+    # 0,0,0,0,0,1 EX-NOR
+
+    #plot_results(binary_logic_gates_out, predictions, [])
 
     if run_till_min:
         # # Plot loss curve
@@ -200,7 +205,7 @@ def load_and_predict():
 
 
 # load_and_predict()
-train(epochs=2_000_000, save_model=False, run_till_min=False, min_loss=0.00001)
+train(epochs=100_000, save_model=False, run_till_min=True, min_loss=0.5)
 
 
 # test_tokenizer()

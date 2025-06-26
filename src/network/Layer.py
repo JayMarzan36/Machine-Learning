@@ -7,9 +7,7 @@ class Layer:
 
         self.output_size = output_size
 
-        self.weights = numpy.random.randn(input_size, output_size) * numpy.sqrt(
-            2.0 / input_size
-        )
+        self.weights = numpy.random.randn(input_size, output_size) * 0.1
 
         self.bias = numpy.zeros((1, output_size))
 
@@ -27,30 +25,26 @@ class Layer:
 
         self.output = None
 
+
     def forward(self, input_data) -> float:
         self.input = input_data
 
-        ## Function original
-        # z = numpy.dot(input_data, self.weights) + self.bias
-
-        # self.output = self.activation(z)
-
-        # return self.output
-
         # Softmax usage
-        z = numpy.dot(self.input, self.weights) + self.bias #TODO see if softmax has a batch learning version. I the batch training is resulting in the 8 from (8,10)
+        z = (
+            numpy.dot(self.input, self.weights) + self.bias
+        )
 
-        a = self._leaky_relu(z)
+        a = self.activation(z)
 
-        # TODO shapes (8,10) and (3,10) not aligned
-        z_2 = numpy.dot(a, self.weights) + self.bias
-
-        self.ouput = self._soft_max(z_2)
+        self.output = self._soft_max(a)
 
         return self.output
 
-    def backward(self, output_error, learning_rate):
-        delta = output_error * self.activation_derivative(self.output)
+    def backward(self, grad, y_one_hot, learning_rate):
+        if self.activation_type == "softmax":
+            delta = grad * self.activation_derivative(self.output, y_one_hot)
+        else:
+            delta = grad * self.activation_derivative(self.output)
 
         d_weights = numpy.dot(self.input.T, delta)
 
@@ -86,6 +80,13 @@ class Layer:
 
             self.activation_type = "lrelu"
 
+        elif type == "softmax":
+            self.activation = self._soft_max
+
+            self.activation_derivative = self._soft_max_derivative
+
+            self.activation_type = "softmax"
+
     def _sigmoid(self, x: float) -> float:
         return 1 / (1 + numpy.exp(-x))
 
@@ -111,5 +112,5 @@ class Layer:
 
         return exp_logits / numpy.sum(exp_logits, axis=1, keepdims=True)
 
-    def _soft_max_derivative(self, x):
-        pass
+    def _soft_max_derivative(self, s, y):
+        return numpy.subtract(s,y)

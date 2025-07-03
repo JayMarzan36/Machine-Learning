@@ -2,7 +2,7 @@ import numpy, json, time
 from Layer import Layer
 
 
-class network:
+class Network:
     def __init__(self, model_path: str = "") -> None:
         self.layers = []
 
@@ -27,12 +27,16 @@ class network:
     def backward(self, grad, learning_rate):
         for i, layer in enumerate(reversed(self.layers)):
             # Only pass y_one_hot to the output (softmax) layer
-            if hasattr(layer, 'activation_type') and layer.activation_type == "softmax":
+            if hasattr(layer, "activation_type") and layer.activation_type == "softmax":
                 grad = layer.backward(grad, self.last_y_batch, learning_rate)
             else:
                 grad = layer.backward(grad, None, learning_rate)
 
-    def train(self, X, y, epochs, learning_rate, print_loss_every=100):
+    def train(self, X, y, epochs, learning_rate, model_name='', save_path='' , save_model=False, print_loss_every=100):
+        #TODO fix the print times
+        #TODO impliment early stopping
+        #TODO look at RMSProp
+        start_time = time.time()
         losses = []
         loss = 0
 
@@ -78,6 +82,16 @@ class network:
                     print(
                         f"Epoch {epoch}, Loss: {loss:.4f}, Time:{time.time() - start_time}"
                     )
+
+        print(f"Train Time: {((time.time() - start_time)/60):.2f} minutes")
+        
+        if save_model:
+            status = self.save_model(model_name, save_path)
+            
+            if status:
+                print(f"Saved {model_name} successfully")
+            else:
+                print(f"Failed to save model")
 
         return losses
 
@@ -126,9 +140,7 @@ class network:
 
             layer_info = layer_dict[key]
 
-            layer = Layer(
-                layer_info["inputs"], layer_info["outputs"]
-            )
+            layer = Layer(layer_info["inputs"], layer_info["outputs"])
 
             layer.weights = numpy.array(layer_info["weights"])
 
@@ -154,7 +166,9 @@ class network:
 
             return {}
 
-    def get_batch_size(self, num_samples, fraction=0.1, min_size=4, max_size=128): #TODO the min_size influences the 8 in (8,10) so the batch size
+    def get_batch_size(
+        self, num_samples, fraction=0.1, min_size=4, max_size=128
+    ):  # TODO the min_size influences the 8 in (8,10) so the batch size
         batch_size = int(num_samples * fraction)
 
         batch_size = max(min_size, min(batch_size, max_size))

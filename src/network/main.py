@@ -2,7 +2,7 @@ import numpy
 import matplotlib.pyplot as plot
 import time
 
-from Network import network
+from Network import Network
 from Layer import Layer
 from util.token import Tokenizer
 from util.plot import plot_results
@@ -83,7 +83,7 @@ def train(
     binary_logic_gates_in = numpy.array(binary_logic_gates_in)
 
     # Create network and add layers
-    net = network()
+    net = Network()
 
     # 3 layers? 1-10-1
     net.add_layer(Layer(3, 16, activation="lrelu"))

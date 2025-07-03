@@ -1,4 +1,5 @@
-import json, math
+import json, math, re
+
 
 class Tokenizer:
     def __init__(self, vocab: str) -> None:
@@ -6,9 +7,11 @@ class Tokenizer:
         self.vocab = self._load_vocab(vocab)
 
     def tokenize(self, input_data: str):
-        data = input_data.lower().split(" ")
-
         tokenized = []
+
+        data = re.findall(r"\w+|[^\w\s]", input_data)
+
+        data = [t for t in data if t.strip() != ""]
 
         for word in range(len(data)):
 
@@ -21,6 +24,14 @@ class Tokenizer:
                 tokenized.append("UNK")
 
         return tokenized
+
+    def batch_tokenize(self, input_data: list) -> list:
+        final_tokens = []
+
+        for token_line in input_data:
+            final_tokens.append(self.tokenize(token_line))
+
+        return final_tokens
 
     def reverse_tokenize(self, input_tokens: list | int | float):
 

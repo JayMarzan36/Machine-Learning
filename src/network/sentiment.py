@@ -7,6 +7,7 @@ from Network import Network
 from Layer import Layer
 from util.token import Tokenizer
 from util.plot import plot_results
+from util.color import *
 
 # 1,0,0,0 Positive
 # 0,1,0,0 Negative
@@ -27,16 +28,14 @@ for item in data["training_data"]:
 
 label = numpy.array(label)
 
-#TODO vectorize the input text
+# TODO vectorize the input text
 tokenizer = Tokenizer("src/network/util/Vocab/vocab_4.json")
-
 
 tokenized_input = tokenizer.batch_tokenize(text)
 
 max_length = 0
 
 tokenized_training_input = numpy.array([])
-
 
 for i in range(len(tokenized_input)):
     current_length = len(tokenized_input[i])
@@ -57,7 +56,6 @@ for j in range(len(tokenized_input)):
 
     temp.append(padded_array)
 
-
 tokenized_training_input = numpy.array(temp)
 
 net = Network()
@@ -75,5 +73,7 @@ losses = net.train(
     learning_rate=0.001,
     print_loss_every=int(epochs / 10),
 )
+
+prBold(f"Final Loss: {losses[len(losses) - 1]}")
 
 plot_results(losses, [], [], legend_labels=("Loss"))

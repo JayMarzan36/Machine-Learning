@@ -1,6 +1,8 @@
 import numpy, json, time
 from Layer import Layer
 
+from util.color import *
+
 
 class Network:
     def __init__(self, model_path: str = "") -> None:
@@ -32,10 +34,20 @@ class Network:
             else:
                 grad = layer.backward(grad, None, learning_rate)
 
-    def train(self, X, y, epochs, learning_rate, model_name='', save_path='' , save_model=False, print_loss_every=100):
-        #TODO fix the print times
-        #TODO impliment early stopping
-        #TODO look at RMSProp
+    def train(
+        self,
+        X,
+        y,
+        epochs,
+        learning_rate,
+        early_stop: float = 0.01,
+        model_name: str = "",
+        save_path: str = "",
+        save_model: bool = False,
+        print_loss_every: int = 100,
+    ):
+        # TODO fix the print times
+        # TODO look at RMSProp
         start_time = time.time()
         losses = []
         loss = 0
@@ -71,6 +83,9 @@ class Network:
                 loss = numpy.sum(log_likelihood) / m
                 losses.append(loss)
 
+                if loss >= early_stop:
+                    break
+
                 # Compute gradient for softmax + cross-entropy
                 grad = output - y_batch
                 self.last_y_batch = y_batch  # Store for backward
@@ -79,19 +94,19 @@ class Network:
             # Checking if print enable then printing every epoch % print_loss_every
             if print_loss_every != 0:
                 if epoch % print_loss_every == 0:
-                    print(
-                        f"Epoch {epoch}, Loss: {loss:.4f}, Time:{time.time() - start_time}"
+                    prOkB(
+                        f"Epoch {epoch}, Loss: {loss:.4}, Time: {(time.time() - start_time):.4}"
                     )
 
-        print(f"Train Time: {((time.time() - start_time)/60):.2f} minutes")
-        
+        prOkG(f"Train Time: {((time.time() - start_time)/60):.2f} minutes")
+
         if save_model:
             status = self.save_model(model_name, save_path)
-            
+
             if status:
-                print(f"Saved {model_name} successfully")
+                prOkG(f"Saved {model_name} successfully")
             else:
-                print(f"Failed to save model")
+                prFail(f"Failed to save model")
 
         return losses
 
@@ -129,7 +144,7 @@ class Network:
         data = self._load_model(path)
 
         if not data or "model" not in data:
-            print("Invalid or missing model data")
+            prFail("Invalid or missing model data")
             return False
 
         self.layers.clear()
@@ -152,7 +167,7 @@ class Network:
 
     def _load_model(self, file_path: str) -> dict:
         if file_path == "":
-            print(f"Empty File Path")
+            prFail("Empty File Path")
 
             return {}
 
@@ -162,13 +177,11 @@ class Network:
                 return json.load(file)
 
         except Exception as e:
-            print(f"Error loading model: {e}")
+            prFail(f"Error loading mode: {e}")
 
             return {}
 
-    def get_batch_size(
-        self, num_samples, fraction=0.1, min_size=4, max_size=128
-    ):  # TODO the min_size influences the 8 in (8,10) so the batch size
+    def get_batch_size(self, num_samples, fraction=0.1, min_size=4, max_size=128):
         batch_size = int(num_samples * fraction)
 
         batch_size = max(min_size, min(batch_size, max_size))

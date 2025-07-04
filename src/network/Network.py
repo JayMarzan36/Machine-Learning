@@ -46,9 +46,7 @@ class Network:
         save_model: bool = False,
         print_loss_every: int = 100,
     ):
-        # TODO fix the print times
         # TODO look at RMSProp
-        start_time = time.time()
         losses = []
         loss = 0
 
@@ -95,10 +93,8 @@ class Network:
             if print_loss_every != 0:
                 if epoch % print_loss_every == 0:
                     prOkB(
-                        f"Epoch {epoch}, Loss: {loss:.4}, Time: {(time.time() - start_time):.4}"
+                        f"Epoch {epoch}, Loss: {loss:.4}"
                     )
-
-        prOkG(f"Train Time: {((time.time() - start_time)/60):.2f} minutes")
 
         if save_model:
             status = self.save_model(model_name, save_path)

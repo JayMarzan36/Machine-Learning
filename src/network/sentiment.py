@@ -7,7 +7,8 @@ from Network import Network
 from Layer import Layer
 from util.token import Tokenizer
 from util.plot import plot_results
-from util.color import *
+
+from utilities import print_c, clear_screen, COLORS
 
 # 1,0,0,0 Positive
 # 0,1,0,0 Negative
@@ -74,6 +75,6 @@ losses = net.train(
     print_loss_every=int(epochs / 10),
 )
 
-prBold(f"Final Loss: {losses[len(losses) - 1]}")
+print_c(f"Final Loss: {losses[len(losses) - 1]}", "warning")
 
-plot_results(losses, [], [], legend_labels=("Loss"))
+#plot_results(losses, [], [], legend_labels=("Loss"))

@@ -1,7 +1,7 @@
 import numpy, json, time
 from Layer import Layer
 
-from util.color import *
+from utilities import print_c, clear_screen, COLORS
 
 
 class Network:
@@ -92,17 +92,17 @@ class Network:
             # Checking if print enable then printing every epoch % print_loss_every
             if print_loss_every != 0:
                 if epoch % print_loss_every == 0:
-                    prOkB(
-                        f"Epoch {epoch}, Loss: {loss:.4}"
+                    print_c(
+                        f"Epoch {epoch}, Loss: {loss:.8}", "object_1"
                     )
 
         if save_model:
             status = self.save_model(model_name, save_path)
 
             if status:
-                prOkG(f"Saved {model_name} successfully")
+                print_c(f"Saved {model_name} successfully", "success")
             else:
-                prFail(f"Failed to save model")
+                print_c(f"Failed to save model", "error")
 
         return losses
 
@@ -140,7 +140,7 @@ class Network:
         data = self._load_model(path)
 
         if not data or "model" not in data:
-            prFail("Invalid or missing model data")
+            print_c("Invalid or missing model data", "error")
             return False
 
         self.layers.clear()
@@ -163,7 +163,7 @@ class Network:
 
     def _load_model(self, file_path: str) -> dict:
         if file_path == "":
-            prFail("Empty File Path")
+            print_c("Empty File Path", "error")
 
             return {}
 
@@ -173,7 +173,7 @@ class Network:
                 return json.load(file)
 
         except Exception as e:
-            prFail(f"Error loading mode: {e}")
+            print_c(f"Error loading mode: {e}", "error")
 
             return {}
 

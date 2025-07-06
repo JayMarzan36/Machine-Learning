@@ -10,6 +10,8 @@ class Network:
 
         self.file_path = model_path
 
+        self.input = None
+
     def add_layer(self, layer):
         self.layers.append(layer)
 
@@ -27,10 +29,35 @@ class Network:
         return self.forward(x)
 
     def backward(self, grad, learning_rate):
+        num_layers = len(self.layers)
+
         for i, layer in enumerate(reversed(self.layers)):
+            layer_index = num_layers - 1 - i
+
+            if layer_index == 0:
+                A_prev = self.input
+            else:
+                A_prev = self.layers[layer_index - 1].output
+
+            dZ = grad
+
+            dW = A_prev.T @ dZ / dZ.shape[0]
+
+            dB = numpy.sum(dZ, axis = 0, keepdims = True) / dZ.shape[0]
+
+            clip_value = 1.0
+
+            dW = numpy.clip(dW, -clip_value, clip_value)
+
+            dB = numpy.clip(dB, -clip_value, clip_value)
+
+            self.adam_update(layer, dW, dB, learning_rate)
+
             # Only pass y_one_hot to the output (softmax) layer
             if hasattr(layer, "activation_type") and layer.activation_type == "softmax":
+
                 grad = layer.backward(grad, self.last_y_batch, learning_rate)
+
             else:
                 grad = layer.backward(grad, None, learning_rate)
 
@@ -46,9 +73,11 @@ class Network:
         save_model: bool = False,
         print_loss_every: int = 100,
     ):
-        # TODO look at RMSProp
+
         losses = []
         loss = 0
+        previous_loss = numpy.inf
+
 
         num_samples = X.shape[0]
         indices = numpy.arange(num_samples)
@@ -72,6 +101,8 @@ class Network:
                 X_batch = X_shuffled[start:end]
                 y_batch = y_shuffled[start:end]
 
+                self.input = X_batch
+                
                 output = self.forward(X_batch)  # Y_hat
 
                 # Compute Loss (Cross Entropy)
@@ -81,7 +112,7 @@ class Network:
                 loss = numpy.sum(log_likelihood) / m
                 losses.append(loss)
 
-                if loss >= early_stop:
+                if loss <= early_stop:
                     break
 
                 # Compute gradient for softmax + cross-entropy
@@ -183,3 +214,52 @@ class Network:
         batch_size = max(min_size, min(batch_size, max_size))
 
         return 2 ** int(round(numpy.log2(batch_size)))
+
+
+
+    def adam_update(
+            self,
+            layer,
+            dW,
+            dB,
+            learning_rate=0.001,
+            beta1=0.9,
+            beta2=0.999,
+            epsilon=1e-8):
+        layer.t += 1
+
+        layer.m_w = beta1 * layer.m_w + (1 - beta1) * dW
+
+        layer.m_b = beta1 * layer.m_b + (1 - beta1) * dB
+
+        layer.v_w = beta2 * layer.v_w + (1 - beta2) * (dW ** 2)
+
+        layer.v_b = beta2 * layer.v_b + (1 - beta2) * (dB ** 2)
+
+        m_w_hat = layer.m_w / (1 - beta1 ** layer.t)
+
+        m_b_hat = layer.m_b / (1 - beta1 ** layer.t)
+
+        v_w_hat = layer.v_w / (1 - beta2 ** layer.t)
+
+        v_b_hat = layer.v_b / (1 - beta2 ** layer.t)
+
+        layer.weights -= learning_rate * m_w_hat / (numpy.sqrt(v_w_hat) + epsilon)
+        layer.bias -= learning_rate * m_b_hat / (numpy.sqrt(v_b_hat) + epsilon)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

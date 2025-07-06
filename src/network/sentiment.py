@@ -16,7 +16,7 @@ from utilities import print_c, clear_screen, COLORS
 # 0,0,0,1 Mixed
 
 data = None
-with open("C:/Users/jaymb/Downloads/sentiment_training_data.json") as file:
+with open("sentiment_training_data.json") as file:
     data = json.load(file)
 
 
@@ -30,7 +30,7 @@ for item in data["training_data"]:
 label = numpy.array(label)
 
 # TODO vectorize the input text
-tokenizer = Tokenizer("src/network/util/Vocab/vocab_4.json")
+tokenizer = Tokenizer("util/Vocab/vocab_4.json")
 
 tokenized_input = tokenizer.batch_tokenize(text)
 

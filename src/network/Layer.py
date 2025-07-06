@@ -11,6 +11,12 @@ class Layer:
 
         self.bias = numpy.zeros((1, output_size))
 
+        self.m_w = numpy.zeros_like(self.weights)
+        self.v_w = numpy.zeros_like(self.weights)
+        self.m_b = numpy.zeros_like(self.bias)
+        self.v_b = numpy.zeros_like(self.bias)
+        self.t = 0
+
         if activation:
             self._apply_activation(activation)
         else:

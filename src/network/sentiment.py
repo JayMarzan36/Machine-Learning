@@ -10,6 +10,12 @@ from util.plot import plot_results
 
 from utilities import print_c, clear_screen, COLORS
 
+
+
+
+
+# TODO: Get new dataset to work with setup
+
 # 1,0,0,0 Positive
 # 0,1,0,0 Negative
 # 0,0,1,0 Neutral
@@ -29,7 +35,6 @@ for item in data["training_data"]:
 
 label = numpy.array(label)
 
-# TODO vectorize the input text
 tokenizer = Tokenizer("util/Vocab/vocab_4.json")
 
 tokenized_input = tokenizer.batch_tokenize(text)

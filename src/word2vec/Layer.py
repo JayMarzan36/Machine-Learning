@@ -94,7 +94,10 @@ class Layer:
             self.activation_type = "softmax"
         elif type == "none":
             self.activation = self._linear
-            self.activation_derivative = self._linear_derivative
+
+            self.activation_derivative = self._linear
+
+            self.activation_type = "none"
 
     def _sigmoid(self, x: float) -> float:
         return 1 / (1 + numpy.exp(-x))

@@ -6,16 +6,33 @@ import math
 from Network import Network
 from Layer import Layer
 
+# 15.64 minutes
+
 
 # can calculate estimate loss with log(vocab_size)
-training_sentence = "Once upon a time, in the grand kingdom of Everlight, a wise king and a brave queen ruled with kindness and strength. The king was known for his wisdom, and the queen was admired for her courage. Every man in the village respected the king for his fairness. Every woman looked up to the queen, who often walked among them, listening to their stories and helping those in need. One day, a poor man came to the castle gates. He asked to see the queen. She welcomed him kindly and gave him food and shelter. The king rewarded the woman who had guided him through the woods to the palace. As seasons passed, the king and queen continued to lead their people. The man who had once been hungry became a trusted advisor. The woman who helped him became the royal gardener, growing roses that the queen loved dearly. The king and queen ruled together for many years, and their names were remembered by every man, woman, and child in Everlight."
+#training_sentence = "Once upon a time, in the grand kingdom of Everlight, a wise king and a brave queen ruled with kindness and strength. The king was known for his wisdom, and the queen was admired for her courage. Every man in the village respected the king for his fairness. Every woman looked up to the queen, who often walked among them, listening to their stories and helping those in need. One day, a poor man came to the castle gates. He asked to see the queen. She welcomed him kindly and gave him food and shelter. The king rewarded the woman who had guided him through the woods to the palace. As seasons passed, the king and queen continued to lead their people. The man who had once been hungry became a trusted advisor. The woman who helped him became the royal gardener, growing roses that the queen loved dearly. The king and queen ruled together for many years, and their names were remembered by every man, woman, and child in Everlight."
+
+
+# Get training data from .txt
+txt_path = "path_to_txt"
+
+temp = []
+
+with open(txt_path, "r") as file:
+    for line in file:
+        temp.append(line)
+
+final = ""
+
+for i in temp:
+    final += i
 
 window_size = 2
 
-embedding_dim = 10
+embedding_dim = 20
 
 # Process input sentence
-training_sentence = training_sentence.lower()
+training_sentence = final.lower()
 
 training_sentence = re.sub(r"[^\w\s]", "", training_sentence)
 
@@ -68,7 +85,7 @@ Y = numpy.array(Y)
 # Setup network
 
 save_model = False
-epochs = 500_000
+epochs = 200_000
 
 net = Network()
 
@@ -148,10 +165,3 @@ result /= numpy.linalg.norm(result)
 closest_word = vector_to_word(result, embedding_matrix, index_to_word, top_n=5)
 
 print(closest_word)
-
-
-
-
-
-
-

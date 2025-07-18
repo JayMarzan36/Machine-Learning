@@ -2,12 +2,16 @@ import numpy
 import json
 import re
 
-from Layer import Layer
+from .Layer import Layer
 
 
-def main(model_path: str, word_index_path: str, index_word_path: str, input: str):
+def pos_encoding(
+    model_path: str, word_index_path: str, index_word_path: str, input: str
+):
 
-    def load_word2vec_data(model_path: str, word_index_path: str, index_to_word_path: str):
+    def load_word2vec_data(
+        model_path: str, word_index_path: str, index_to_word_path: str
+    ):
         target_layer = 0
 
         full_model = None
@@ -35,12 +39,11 @@ def main(model_path: str, word_index_path: str, index_word_path: str, input: str
 
         with open(word_index_path, "r") as file:
             word_to_index = json.load(file)
-            
+
         with open(index_to_word_path, "r") as file:
             index_to_word = json.load(file)
-            
+
             index_to_word = {int(key): value for key, value in index_to_word.items()}
-            
 
         return final_layer.weights, word_to_index, index_to_word
 
@@ -48,14 +51,10 @@ def main(model_path: str, word_index_path: str, index_word_path: str, input: str
         model_path, word_index_path, index_word_path
     )
 
-    print("Loaded data")
-
     # Position embedding
-    # This process can be calculated in parallel 
+    # This process can be calculated in parallel
 
-    def get_position_encoding(
-        sequence_len: int, embedding_dim: int, n: int = 10_000
-    ):
+    def get_position_encoding(sequence_len: int, embedding_dim: int, n: int = 10_000):
         P = numpy.zeros((sequence_len, embedding_dim))
 
         for i in range(sequence_len):
@@ -69,9 +68,7 @@ def main(model_path: str, word_index_path: str, index_word_path: str, input: str
 
     embedding_dim = 4
 
-    token_indecies = []
-
-    # Clean input 
+    # Clean input
     clean_sentence = input.lower()
 
     clean_sentence = re.sub(r"[^\w\s]", "", clean_sentence)
@@ -92,7 +89,7 @@ def main(model_path: str, word_index_path: str, index_word_path: str, input: str
     index_count = 0
     for i in positions:
         sequence_vectors[index_count] += i
-        
+
         index_count += 1
-        
+
     return sequence_vectors

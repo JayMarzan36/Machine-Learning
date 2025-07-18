@@ -117,7 +117,7 @@ def main(data_path: str, save_model: bool = False):
         word_to_index_save_path = f"{destination}/{file_name}_word-to-index.json"
         with open(word_to_index_save_path, "w") as file:
             json.dump(word_to_index, file, indent=4)
-        
+
         index_to_word_save_path = f"{destination}/{file_name}_index-to-word.json"
         with open(index_to_word_save_path, "w") as file:
             json.dump(index_to_word, file, indent=4)
@@ -127,11 +127,9 @@ def main(data_path: str, save_model: bool = False):
         else:
             print(f"Error saving model")
 
-
     # Function for getting similarity between vectors
     # def cosine_similarity(v1, v2):
     #     return numpy.dot(v1, v2) / (numpy.linalg.norm(v1) * numpy.linalg.norm(v2))
-
 
     # # Function for getting word
 
@@ -146,3 +144,6 @@ def main(data_path: str, save_model: bool = False):
     #     similarities.sort(key=lambda x: x[1], reverse=True)
 
     #     return [index_to_word[i] for i, _ in similarities[:top_n]]
+
+if __name__ == "__main__":
+    main("src/word2vec/text.txt", save_model=True)

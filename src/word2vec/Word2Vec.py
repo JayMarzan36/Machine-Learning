@@ -146,4 +146,4 @@ def main(data_path: str, save_model: bool = False):
     #     return [index_to_word[i] for i, _ in similarities[:top_n]]
 
 if __name__ == "__main__":
-    main("src/word2vec/text.txt", save_model=True)
+    main("src/word2vec/general_text_10k.txt", save_model=True)

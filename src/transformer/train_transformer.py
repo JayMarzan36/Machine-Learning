@@ -37,10 +37,19 @@ embedding_dim = 4
 transformer = DecoderOnlyTransformer(embedding_dim, num_heads=8, num_layers=6)
 
 
-training_text = "Once upon a time, in the grand kingdom of Everlight, a wise king and a brave queen ruled with kindness and strength. The king was known for his wisdom, and the queen was admired for her courage. Every man in the village respected the king for his fairness. Every woman looked up to the queen, who often walked among them, listening to their stories and helping those in need. One day, a poor man came to the castle gates. He asked to see the queen. She welcomed him kindly and gave him food and shelter. The king rewarded the woman who had guided him through the woods to the palace. As seasons passed, the king and queen continued to lead their people. The man who had once been hungry became a trusted advisor. The woman who helped him became the royal gardener, growing roses that the queen loved dearly. The king and queen ruled together for many years, and their names were remembered by every man, woman, and child in Everlight."
+temp = []
+
+with open("src/word2vec/long_text.txt", "r") as file:
+    for line in file:
+        temp.append(line)
+
+final = ""
+
+for i in temp:
+    final += i
 
 
-training_pairs = create_training_pairs(training_text, word_to_index)
+training_pairs = create_training_pairs(final, word_to_index)
 
 
 transformer.train_transformer(
@@ -50,6 +59,7 @@ transformer.train_transformer(
     model_path,
     word_index_path,
     index_word_path,
+    epochs=200
 )
 
 
@@ -78,7 +88,7 @@ def generate_next_word(
     return predicted_word
 
 
-seed_text = "He looked"
+seed_text = "AI now"
 generated_text = transformer.generate_sequence(
     seed_text=seed_text,
     word_to_index=word_to_index,
@@ -86,7 +96,7 @@ generated_text = transformer.generate_sequence(
     model_path="src/word2vec/model/word2vec.json",
     word_index_path="src/word2vec/model/word2vec_word-to-index.json",
     index_word_path="src/word2vec/model/word2vec_index-to-word.json",
-    max_length=10,
+    max_length=20,
     temperature=0.7,
 )
 print(generated_text)

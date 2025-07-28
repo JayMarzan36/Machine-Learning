@@ -194,5 +194,9 @@ cython_debug/
 .cursorindexingignore
 
 src/network/model/*
+src/network/data_set
 
-src/network/data_set 
+src/transformer/model
+
+src/word2vec/model
+src/word2vec/AllCombined.txt

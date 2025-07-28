@@ -55,7 +55,6 @@ class encoder:
         return exp_x / numpy.sum(exp_x)
 
     def backward(self, gradient, learning_rate):
-        """Backward pass through the encoder layer"""
         d_values = numpy.zeros_like(self.sequence_vectors)
         d_weights = {
             "q": numpy.zeros_like(self.W_q),

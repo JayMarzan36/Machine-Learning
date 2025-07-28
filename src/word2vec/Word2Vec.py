@@ -7,25 +7,29 @@ import json
 from Network import Network
 from Layer import Layer
 
-# 15.64 minutes
-# "D:/Projects/Code/Organized/Machine Learning/New folder/Machine-Learning/src/word2vec/text.txt"
-# can calculate estimate loss with log(vocab_size)
+
 def main(data_path: str, save_model: bool = False):
+    print("Starting")
 
-    temp = []
+    reading_time = time.time()
 
-    with open(data_path, "r") as file:
-        for line in file:
-            temp.append(line)
-
+    count = 0
+    print("Reading")
     final = ""
-
-    for i in temp:
-        final += i
+    with open(data_path, "r", encoding="utf-8") as file:
+        for line in file:
+            if count >= 2_000:
+                break
+            final += line
+            count += 1
+            print(f"Lines read {count}", end="\r")
+    print("Text loaded")
 
     window_size = 2
 
     embedding_dim = 4
+
+    print("Text processing")
 
     # Process input sentence
     training_sentence = final.lower()
@@ -36,17 +40,20 @@ def main(data_path: str, save_model: bool = False):
 
     vocab = list(set(tokens))
 
+    print(f"Processed Text : Processing time {time.time() - reading_time}")
+
     print(f"Estimate loss {math.log(len(vocab))}")
 
     # Setup input for array
 
-    word_to_index = {word : i for i, word in enumerate(vocab)}
+    word_to_index = {word: i for i, word in enumerate(vocab)}
 
     index_to_word = {i: word for word, i in word_to_index.items()}
 
     vocab_size = len(vocab)
 
     def generate_skipgram_pairs(tokens: list, window_size: int = 2):
+        print("Generating pairs")
         pairs = []
 
         for i, center in enumerate(tokens):
@@ -80,7 +87,9 @@ def main(data_path: str, save_model: bool = False):
 
     # Setup network
 
-    epochs = 200_000
+    print("Setting up network")
+
+    epochs = 20
 
     net = Network()
 
@@ -90,6 +99,8 @@ def main(data_path: str, save_model: bool = False):
     # Train
 
     start_time = time.time()
+
+    print("Starting train cycle")
 
     losses = net.train(
         X,
@@ -107,13 +118,13 @@ def main(data_path: str, save_model: bool = False):
 
     if save_model:
 
-        destination = "D:/Projects/Code/Organized/Machine Learning/New folder/Machine-Learning/src/word2vec/model"
+        destination = "src/word2vec/model"
         file_name = "word2vec"
 
         status = net.save_model(
             file_name=file_name,
             destination=destination,
-    )
+        )
         word_to_index_save_path = f"{destination}/{file_name}_word-to-index.json"
         with open(word_to_index_save_path, "w") as file:
             json.dump(word_to_index, file, indent=4)
@@ -145,5 +156,6 @@ def main(data_path: str, save_model: bool = False):
 
     #     return [index_to_word[i] for i, _ in similarities[:top_n]]
 
+
 if __name__ == "__main__":
-    main("src/word2vec/general_text_10k.txt", save_model=True)
+    main("src/word2vec/AllCombined.txt", save_model=True)

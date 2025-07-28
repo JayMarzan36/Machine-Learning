@@ -43,7 +43,7 @@ class Network:
 
             dW = A_prev.T @ dZ / dZ.shape[0]
 
-            dB = numpy.sum(dZ, axis = 0, keepdims = True) / dZ.shape[0]
+            dB = numpy.sum(dZ, axis=0, keepdims=True) / dZ.shape[0]
 
             clip_value = 1.0
 
@@ -78,7 +78,6 @@ class Network:
         loss = 0
         previous_loss = numpy.inf
 
-
         num_samples = X.shape[0]
         indices = numpy.arange(num_samples)
 
@@ -102,7 +101,7 @@ class Network:
                 y_batch = y_shuffled[start:end]
 
                 self.input = X_batch
-                
+
                 output = self.forward(X_batch)  # Y_hat
 
                 # Compute Loss (Cross Entropy)
@@ -123,9 +122,7 @@ class Network:
             # Checking if print enable then printing every epoch % print_loss_every
             if print_loss_every != 0:
                 if epoch % print_loss_every == 0:
-                    print_c(
-                        f"Epoch {epoch}, Loss: {loss:.8}", "object_1"
-                    )
+                    print_c(f"Epoch {epoch}, Loss: {loss:.8}", "object_1")
 
         if save_model:
             status = self.save_model(model_name, save_path)
@@ -161,7 +158,7 @@ class Network:
 
             save_path = f"{destination}/{file_name}.json"
 
-            with open(save_path, "w") as file:
+            with open(save_path, "w+") as file:
                 json.dump(data, file, indent=4)
             return True
         except Exception as e:
@@ -215,51 +212,26 @@ class Network:
 
         return 2 ** int(round(numpy.log2(batch_size)))
 
-
-
     def adam_update(
-            self,
-            layer,
-            dW,
-            dB,
-            learning_rate=0.001,
-            beta1=0.9,
-            beta2=0.999,
-            epsilon=1e-8):
+        self, layer, dW, dB, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8
+    ):
         layer.t += 1
 
         layer.m_w = beta1 * layer.m_w + (1 - beta1) * dW
 
         layer.m_b = beta1 * layer.m_b + (1 - beta1) * dB
 
-        layer.v_w = beta2 * layer.v_w + (1 - beta2) * (dW ** 2)
+        layer.v_w = beta2 * layer.v_w + (1 - beta2) * (dW**2)
 
-        layer.v_b = beta2 * layer.v_b + (1 - beta2) * (dB ** 2)
+        layer.v_b = beta2 * layer.v_b + (1 - beta2) * (dB**2)
 
-        m_w_hat = layer.m_w / (1 - beta1 ** layer.t)
+        m_w_hat = layer.m_w / (1 - beta1**layer.t)
 
-        m_b_hat = layer.m_b / (1 - beta1 ** layer.t)
+        m_b_hat = layer.m_b / (1 - beta1**layer.t)
 
-        v_w_hat = layer.v_w / (1 - beta2 ** layer.t)
+        v_w_hat = layer.v_w / (1 - beta2**layer.t)
 
-        v_b_hat = layer.v_b / (1 - beta2 ** layer.t)
+        v_b_hat = layer.v_b / (1 - beta2**layer.t)
 
         layer.weights -= learning_rate * m_w_hat / (numpy.sqrt(v_w_hat) + epsilon)
         layer.bias -= learning_rate * m_b_hat / (numpy.sqrt(v_b_hat) + epsilon)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

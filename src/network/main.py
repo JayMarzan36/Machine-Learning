@@ -191,7 +191,7 @@ def train(
 
 
 def load_and_predict():
-    net = network()
+    net = Network()
 
     load = net.load_model(
         "D:/Projects/Code/Organized/Machine Learning/New folder/Machine-Learning/src/network/model/sin_model.json"
@@ -206,6 +206,3 @@ def load_and_predict():
 
 # load_and_predict()
 train(epochs=100_000, save_model=False, run_till_min=True, min_loss=0.5)
-
-
-# test_tokenizer()
